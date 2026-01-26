@@ -3,6 +3,7 @@ package io.github.realtryz.journal.ui.screens
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
@@ -37,7 +39,7 @@ fun SettingsScreen(
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(scrollState)
@@ -48,71 +50,96 @@ fun SettingsScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Text(
-            text = stringResource(R.string.language_setting),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column {
+        SettingsSection(title = stringResource(R.string.language_setting)) {
+            SettingsGroup {
                 LanguageOption(
                     languageName = stringResource(R.string.english),
                     languageCode = "en",
-                    isSelected = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-                        .contains("en") ||
-                            (AppCompatDelegate.getApplicationLocales().isEmpty && Locale.getDefault().language == "en")
+                    isSelected = isLanguageSelected("en")
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.surface)
                 LanguageOption(
                     languageName = stringResource(R.string.german),
                     languageCode = "de",
-                    isSelected = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-                        .contains("de") ||
-                            (AppCompatDelegate.getApplicationLocales().isEmpty && Locale.getDefault().language == "de")
+                    isSelected = isLanguageSelected("de")
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        SettingsSection(title = stringResource(R.string.about_title)) {
+            SettingsGroup {
+                SettingsClickableItem(
+                    title = stringResource(R.string.contributions_title),
+                    description = stringResource(R.string.contributions_desc),
+                    icon = Icons.Default.Settings,
+                    onClick = onContributorsClicked
+                )
+            }
+        }
+    }
+}
+
+private fun isLanguageSelected(languageCode: String): Boolean {
+    val locales = AppCompatDelegate.getApplicationLocales()
+    return locales.toLanguageTags().contains(languageCode) ||
+            (locales.isEmpty && Locale.getDefault().language == languageCode)
+}
+
+@Composable
+fun SettingsSection(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Column {
         Text(
-            text = stringResource(R.string.about_title),
+            text = title,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+        content()
+    }
+}
 
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onContributorsClicked() }
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Default.Settings, contentDescription = stringResource(R.string.settings)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = stringResource(R.string.contributions_title),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = stringResource(R.string.contributions_desc),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+@Composable
+fun SettingsGroup(
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth(),
+        content = { Column(content = content) }
+    )
+}
+
+@Composable
+fun SettingsClickableItem(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null)
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -135,7 +162,7 @@ fun LanguageOption(
     ) {
         RadioButton(
             selected = isSelected,
-            onClick = null // Handling click on Row
+            onClick = null
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(

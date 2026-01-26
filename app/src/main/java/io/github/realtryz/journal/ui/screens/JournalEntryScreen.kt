@@ -50,6 +50,7 @@ import io.github.realtryz.journal.R
 import io.github.realtryz.journal.ui.components.ConfirmationDialog
 import io.github.realtryz.journal.ui.viewmodels.JournalViewModel
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -60,7 +61,6 @@ fun JournalEntryView(
     viewModel: JournalViewModel,
     journalId: String
 ) {
-    // Ensure the correct journal is selected when entering the screen
     LaunchedEffect(journalId) {
         viewModel.selectJournal(journalId)
     }
@@ -71,14 +71,6 @@ fun JournalEntryView(
     var textFieldValue by remember { mutableStateOf(TextFieldValue("")) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-
-    val textStyle = LocalTextStyle.current.copy(
-        lineHeight = 32.sp,
-        fontSize = 18.sp
-    )
-    val density = LocalDensity.current
-    val lineHeightPx = with(density) { textStyle.lineHeight.toPx() }
-    val paddingTopPx = with(density) { 16.dp.toPx() }
 
     LaunchedEffect(date, entry) {
         val selectedDateString = date?.format(DateTimeFormatter.ISO_DATE)
@@ -106,134 +98,181 @@ fun JournalEntryView(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = {
-                showDeleteConfirmation = true
-            }) {
-                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_entry))
-            }
-
-            if(showDeleteConfirmation) {
-                ConfirmationDialog(
-                    onDelete = { viewModel.deleteEntry()
-                               showDeleteConfirmation = false },
-                    onDismiss = { showDeleteConfirmation = false },
-                    title = stringResource(R.string.delete_entry) + "?",
-                    text = stringResource(R.string.permanently_delete_entry),
-                    confirmText = stringResource(R.string.delete),
-                    dismissText = stringResource(R.string.cancel)
-                )
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { viewModel.previousDay(textFieldValue.text) }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = stringResource(R.string.previous_day)
-                    )
-                }
-
-                Text(
-                    text = date?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) ?: "",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .clickable { showDatePicker = true }
-                )
-
-                IconButton(onClick = { viewModel.nextDay(textFieldValue.text) }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = stringResource(R.string.next_day)
-                    )
-                }
-            }
-
-            IconButton(onClick = { viewModel.saveEntry(textFieldValue.text) }) {
-                Icon(Icons.Default.Check, contentDescription = stringResource(R.string.save))
-            }
-        }
+        JournalEntryTopBar(
+            date = date,
+            onDeleteClick = { showDeleteConfirmation = true },
+            onPreviousDayClick = { viewModel.previousDay(textFieldValue.text) },
+            onNextDayClick = { viewModel.nextDay(textFieldValue.text) },
+            onDateClick = { showDatePicker = true },
+            onSaveClick = { viewModel.saveEntry(textFieldValue.text) }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextField(
+        JournalEntryTextField(
             value = textFieldValue,
             onValueChange = { textFieldValue = it },
-            textStyle = textStyle,
-            modifier = Modifier
-                .fillMaxSize()
-                .drawBehind {
-                    val strokeWidth = 1.dp.toPx()
-                    val color = Color.LightGray.copy(alpha = 0.5f)
+            modifier = Modifier.weight(1f)
+        )
+    }
 
-                    var y = paddingTopPx + lineHeightPx
-                    while (y < size.height) {
-                        drawLine(
-                            color = color,
-                            start = Offset(0f, y),
-                            end = Offset(size.width, y),
-                            strokeWidth = strokeWidth
-                        )
-                        y += lineHeightPx
-                    }
-                },
-            placeholder = { Text(stringResource(R.string.on_mind_today)) },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            )
+    if (showDeleteConfirmation) {
+        ConfirmationDialog(
+            onDelete = {
+                viewModel.deleteEntry()
+                showDeleteConfirmation = false
+            },
+            onDismiss = { showDeleteConfirmation = false },
+            title = stringResource(R.string.delete_entry) + "?",
+            text = stringResource(R.string.permanently_delete_entry),
+            confirmText = stringResource(R.string.delete),
+            dismissText = stringResource(R.string.cancel)
         )
     }
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = date?.atStartOfDay(ZoneId.systemDefault())?.toInstant()
-                ?.toEpochMilli()
+        JournalEntryDatePicker(
+            initialDate = date,
+            onDateSelected = { selectedDate ->
+                viewModel.setDate(selectedDate, textFieldValue.text)
+                showDatePicker = false
+            },
+            onDismiss = { showDatePicker = false }
         )
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val selectedDate = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-                        viewModel.setDate(selectedDate, textFieldValue.text)
-                    }
-                    showDatePicker = false
-                }) {
-                    Text(stringResource(R.string.ok))
+    }
+}
+
+@Composable
+fun JournalEntryTopBar(
+    date: LocalDate?,
+    onDeleteClick: () -> Unit,
+    onPreviousDayClick: () -> Unit,
+    onNextDayClick: () -> Unit,
+    onDateClick: () -> Unit,
+    onSaveClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onDeleteClick) {
+            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_entry))
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onPreviousDayClick) {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = null)
+            }
+
+            Text(
+                text = date?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) ?: "",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .clickable { onDateClick() }
+            )
+
+            IconButton(onClick = onNextDayClick) {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+            }
+        }
+
+        IconButton(onClick = onSaveClick) {
+            Icon(Icons.Default.Check, contentDescription = stringResource(R.string.save))
+        }
+    }
+}
+
+@Composable
+fun JournalEntryTextField(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val textStyle = LocalTextStyle.current.copy(
+        lineHeight = 32.sp,
+        fontSize = 18.sp
+    )
+    val density = LocalDensity.current
+    val lineHeightPx = with(density) { textStyle.lineHeight.toPx() }
+    val paddingTopPx = with(density) { 16.dp.toPx() }
+
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        textStyle = textStyle,
+        modifier = modifier
+            .fillMaxSize()
+            .drawBehind {
+                val strokeWidth = 1.dp.toPx()
+                val color = Color.LightGray.copy(alpha = 0.5f)
+                var y = paddingTopPx + lineHeightPx
+                while (y < size.height) {
+                    drawLine(
+                        color = color,
+                        start = Offset(0f, y),
+                        end = Offset(size.width, y),
+                        strokeWidth = strokeWidth
+                    )
+                    y += lineHeightPx
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text(stringResource(R.string.cancel))
+        placeholder = { Text(stringResource(R.string.on_mind_today)) },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun JournalEntryDatePicker(
+    initialDate: LocalDate?,
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant()
+            ?.toEpochMilli()
+    )
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                datePickerState.selectedDateMillis?.let { millis ->
+                    val selectedDate = Instant.ofEpochMilli(millis)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                    onDateSelected(selectedDate)
                 }
+            }) {
+                Text(stringResource(R.string.ok))
             }
-        ) {
-            DatePicker(
-                state = datePickerState,
-                showModeToggle = false,
-                title = null,
-                headline = {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.select_date),
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    }
-                }
-            )
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
         }
+    ) {
+        DatePicker(
+            state = datePickerState,
+            showModeToggle = false,
+            title = null,
+            headline = {
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = stringResource(R.string.select_date),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+        )
     }
 }
