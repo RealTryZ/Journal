@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Journal</string>
     <string name="credit_journal">Journal Icon - Created by Aeliz from Noun Project</string>
@@ -15,7 +16,7 @@
     <string name="delete_journal">Delete journal?</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
-    <string name="delete_journal_and_entries">Do you really want to permanently delete the journal and all it\'s entries?chen?</string>
+    <string name="delete_journal_and_entries">Do you really want to permanently delete the journal and all it\'s entries?</string>
     <string name="enter_name_and_color">Enter a name and choose a color.</string>
     <string name="title">Title</string>
     <string name="color">Color</string>

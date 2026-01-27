@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tagebuch</string>
+    <string name="credit_journal">Journal Icon - Erstellt von Aeliz vom Noun Project</string>
+    <string name="contributions_title">Mitwirkungen</string>
+    <string name="back">zurück</string>
+    <string name="credits_title">Danksagungen</string>
+    <string name="about_title">Über</string>
+    <string name="language_setting">Sprache</string>
+    <string name="settings_title">Einstellungen</string>
+    <string name="contributions_desc">Mitwirkungen</string>
+    <string name="edit_journal">Bearbeite Tagebuch</string>
+    <string name="save">Speichern</string>
+    <string name="new_journal">Neues Tagebuch</string>
+    <string name="create">Erstellen</string>
+    <string name="delete_journal">Tagebuch löschen?</string>
+    <string name="delete">Löschen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="delete_journal_and_entries">Möchtest du wirklich das Tagebuch und all seine Einträge löschen?</string>
+    <string name="enter_name_and_color">Trage einen Namen ein und wähle eine Farbe.</string>
+    <string name="title">Titel</string>
+    <string name="color">Farbe</string>
+    <string name="add_journal">Tagebuch hinzufügen</string>
+    <string name="home">Startseite</string>
+    <string name="journals">Tagebücher</string>
+    <string name="settings">Einstellungen</string>
+    <string name="options">Optionen</string>
+    <string name="unknown_route">Unbekannte Route</string>
+    <string name="select_date">Datum auswählen</string>
+    <string name="ok">OK</string>
+    <string name="next_day">Nächster Tag</string>
+    <string name="previous_day">Vorheriger Tag</string>
+    <string name="delete_entry">Eintrag löschen</string>
+    <string name="permanently_delete_entry">Möchtest du wirklich dauerhaft diesen Eintrag löschen?</string>
+    <string name="on_mind_today">Was beschäftigt dich heute?</string>
+    <string name="german">Deutsch</string>
+    <string name="english">Englisch</string>
+</resources>
