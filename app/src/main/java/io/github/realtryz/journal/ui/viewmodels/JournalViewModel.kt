@@ -7,6 +7,7 @@ import io.github.realtryz.journal.db.JournalDatabase
 import io.github.realtryz.journal.domain.Journal
 import io.github.realtryz.journal.domain.JournalEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,8 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
         )
 
     private val _selectedJournalId = MutableStateFlow<String?>(null)
+    val selectedJournalId: StateFlow<String?> = _selectedJournalId
+    
     private val _selectedDate = MutableStateFlow<LocalDate?>(null)
     val selectedDate: StateFlow<LocalDate?> = _selectedDate
 
@@ -48,9 +51,18 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
             initialValue = null
         )
 
+    fun getEntriesForJournal(journalId: String): Flow<List<JournalEntry>> {
+        return journalEntryDao.getEntriesForJournal(journalId)
+    }
+
     fun selectJournal(journalId: String) {
         _selectedJournalId.value = journalId
         _selectedDate.value = LocalDate.now()
+    }
+
+    fun selectJournalAndDate(journalId: String, date: LocalDate) {
+        _selectedJournalId.value = journalId
+        _selectedDate.value = date
     }
 
     fun setDate(date: LocalDate, currentContent: String) {
@@ -66,12 +78,6 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
     fun previousDay(currentContent: String) {
         saveEntry(currentContent)
         _selectedDate.value = _selectedDate.value?.minusDays(1)
-    }
-
-    fun closeJournal(currentContent: String) {
-        saveEntry(currentContent)
-        _selectedJournalId.value = null
-        _selectedDate.value = null
     }
 
     fun addJournal(title: String, color: Int) {

@@ -20,6 +20,9 @@ interface JournalEntryDao {
     @Query("SELECT * FROM journalEntry WHERE journalId = :journalId AND date = :date LIMIT 1")
     fun getByDate(journalId: String, date: String): Flow<JournalEntry?>
 
+    @Query("SELECT * FROM journalEntry WHERE journalId = :journalId ORDER BY date DESC")
+    fun getEntriesForJournal(journalId: String): Flow<List<JournalEntry>>
+
     @Query("SELECT date FROM journalEntry WHERE journalId = :journalId")
     fun getDatesWithEntries(journalId: String): Flow<List<String>>
 

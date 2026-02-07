@@ -8,4 +8,5 @@ sealed interface Screens {
     @Serializable data object Settings : NavKey
     @Serializable data object Contributions : NavKey
     @Serializable data class Detail(val id: String) : NavKey
+    @Serializable data class Overview(val id: String) : NavKey
 }

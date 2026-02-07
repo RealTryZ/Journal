@@ -1,6 +1,6 @@
 package io.github.realtryz.journal.ui.screens
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -52,6 +52,7 @@ import io.github.realtryz.journal.ui.viewmodels.JournalViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import io.github.realtryz.journal.ui.theme.BeigeYellow
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,10 +60,13 @@ import java.time.format.DateTimeFormatter
 fun JournalEntryView(
     modifier: Modifier = Modifier,
     viewModel: JournalViewModel,
-    journalId: String
+    journalId: String,
+    onSaved: () -> Unit
 ) {
     LaunchedEffect(journalId) {
-        viewModel.selectJournal(journalId)
+        if (viewModel.selectedJournalId.value != journalId) {
+            viewModel.selectJournal(journalId)
+        }
     }
 
     val date by viewModel.selectedDate.collectAsState()
@@ -104,7 +108,10 @@ fun JournalEntryView(
             onPreviousDayClick = { viewModel.previousDay(textFieldValue.text) },
             onNextDayClick = { viewModel.nextDay(textFieldValue.text) },
             onDateClick = { showDatePicker = true },
-            onSaveClick = { viewModel.saveEntry(textFieldValue.text) }
+            onSaveClick = {
+                viewModel.saveEntry(textFieldValue.text)
+                onSaved()
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
