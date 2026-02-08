@@ -1,5 +1,8 @@
 package io.github.realtryz.journal.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,11 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +39,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,19 +48,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import io.github.realtryz.journal.R
 import io.github.realtryz.journal.ui.components.ConfirmationDialog
 import io.github.realtryz.journal.ui.viewmodels.JournalViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import io.github.realtryz.journal.ui.theme.BeigeYellow
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,8 +82,20 @@ fun JournalEntryView(
     val entry by viewModel.currentEntry.collectAsState()
 
     var textFieldValue by remember { mutableStateOf(TextFieldValue("")) }
+    val imageUris = remember { mutableStateListOf<String>() }
     var showDatePicker by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(),
+        onResult = { uris ->
+            uris.forEach { uri ->
+                if (!imageUris.contains(uri.toString())) {
+                    imageUris.add(uri.toString())
+                }
+            }
+        }
+    )
 
     LaunchedEffect(date, entry) {
         val selectedDateString = date?.format(DateTimeFormatter.ISO_DATE)
@@ -86,14 +107,17 @@ fun JournalEntryView(
                     selection = TextRange(newText.length)
                 )
             }
+            imageUris.clear()
+            imageUris.addAll(entry?.imageUris ?: emptyList())
         } else {
             textFieldValue = TextFieldValue("")
+            imageUris.clear()
         }
     }
 
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.saveEntry(textFieldValue.text)
+            viewModel.saveEntry(textFieldValue.text, imageUris.toList())
         }
     }
 
@@ -105,14 +129,38 @@ fun JournalEntryView(
         JournalEntryTopBar(
             date = date,
             onDeleteClick = { showDeleteConfirmation = true },
-            onPreviousDayClick = { viewModel.previousDay(textFieldValue.text) },
-            onNextDayClick = { viewModel.nextDay(textFieldValue.text) },
+            onPreviousDayClick = { viewModel.previousDay(textFieldValue.text, imageUris.toList()) },
+            onNextDayClick = { viewModel.nextDay(textFieldValue.text, imageUris.toList()) },
             onDateClick = { showDatePicker = true },
             onSaveClick = {
-                viewModel.saveEntry(textFieldValue.text)
+                viewModel.saveEntry(textFieldValue.text, imageUris.toList())
                 onSaved()
+            },
+            onAddImageClick = {
+                photoPickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
             }
         )
+
+        if (imageUris.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(imageUris) { uri ->
+                    AsyncImage(
+                        model = uri,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clickable { imageUris.remove(uri) },
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -141,7 +189,7 @@ fun JournalEntryView(
         JournalEntryDatePicker(
             initialDate = date,
             onDateSelected = { selectedDate ->
-                viewModel.setDate(selectedDate, textFieldValue.text)
+                viewModel.setDate(selectedDate, textFieldValue.text, imageUris.toList())
                 showDatePicker = false
             },
             onDismiss = { showDatePicker = false }
@@ -157,6 +205,7 @@ fun JournalEntryTopBar(
     onNextDayClick: () -> Unit,
     onDateClick: () -> Unit,
     onSaveClick: () -> Unit,
+    onAddImageClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -164,8 +213,13 @@ fun JournalEntryTopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onDeleteClick) {
-            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_entry))
+        Row {
+            IconButton(onClick = onDeleteClick) {
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_entry))
+            }
+            IconButton(onClick = onAddImageClick) {
+                Icon(Icons.Default.Image, contentDescription = "Bild hinzufügen")
+            }
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {

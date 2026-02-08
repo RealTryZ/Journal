@@ -10,5 +10,6 @@ data class JournalEntry (
     val title: String,
     val content: String,
     val date: String,
-    val journalId: String
+    val journalId: String,
+    val imageUris: List<String> = emptyList()
 )

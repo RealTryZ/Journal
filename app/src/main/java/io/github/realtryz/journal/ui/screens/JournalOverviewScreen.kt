@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.realtryz.journal.domain.Journal
 import io.github.realtryz.journal.domain.JournalEntry
 import io.github.realtryz.journal.ui.theme.BeigeYellow
 import io.github.realtryz.journal.ui.viewmodels.JournalViewModel
@@ -37,8 +36,6 @@ fun JournalOverviewScreen(
     onNavigateToDetail: (String) -> Unit
 ) {
     val entries by viewModel.getEntriesForJournal(journalId).collectAsState(initial = emptyList())
-    val journals by viewModel.journals.collectAsState()
-    val journal = journals.find { it.id == journalId }
 
     Column(modifier = modifier.fillMaxSize()) {
         LazyVerticalGrid(
@@ -50,7 +47,6 @@ fun JournalOverviewScreen(
             items(entries) { entry ->
                 JournalOverviewItem(
                     entry = entry,
-                    journal = journal,
                     onClick = {
                         viewModel.selectJournalAndDate(journalId, LocalDate.parse(entry.date))
                         onNavigateToDetail(journalId)
@@ -65,7 +61,6 @@ fun JournalOverviewScreen(
 fun JournalOverviewItem(
     modifier: Modifier = Modifier,
     entry: JournalEntry,
-    journal: Journal?,
     onClick: () -> Unit
 ) {
     val date = LocalDate.parse(entry.date)

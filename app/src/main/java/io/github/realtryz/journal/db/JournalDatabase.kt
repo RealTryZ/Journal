@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import io.github.realtryz.journal.db.daos.JournalDao
 import io.github.realtryz.journal.db.daos.JournalEntryDao
 import io.github.realtryz.journal.domain.Journal
@@ -11,8 +12,9 @@ import io.github.realtryz.journal.domain.JournalEntry
 
 @Database(
     entities = [Journal::class, JournalEntry::class],
-    version = 2
+    version = 3
 )
+@TypeConverters(Converters::class)
 abstract class JournalDatabase : RoomDatabase() {
 
     abstract fun journalDao(): JournalDao

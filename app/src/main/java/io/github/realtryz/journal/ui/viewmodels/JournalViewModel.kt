@@ -65,18 +65,18 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
         _selectedDate.value = date
     }
 
-    fun setDate(date: LocalDate, currentContent: String) {
-        saveEntry(currentContent)
+    fun setDate(date: LocalDate, currentContent: String, currentImageUris: List<String>) {
+        saveEntry(currentContent, currentImageUris)
         _selectedDate.value = date
     }
 
-    fun nextDay(currentContent: String) {
-        saveEntry(currentContent)
+    fun nextDay(currentContent: String, currentImageUris: List<String>) {
+        saveEntry(currentContent, currentImageUris)
         _selectedDate.value = _selectedDate.value?.plusDays(1)
     }
 
-    fun previousDay(currentContent: String) {
-        saveEntry(currentContent)
+    fun previousDay(currentContent: String, currentImageUris: List<String>) {
+        saveEntry(currentContent, currentImageUris)
         _selectedDate.value = _selectedDate.value?.minusDays(1)
     }
 
@@ -99,23 +99,24 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun saveEntry(content: String) {
+    fun saveEntry(content: String, imageUris: List<String> = currentEntry.value?.imageUris ?: emptyList()) {
         val journalId = _selectedJournalId.value ?: return
         val date = _selectedDate.value ?: return
         val dateString = date.format(DateTimeFormatter.ISO_DATE)
         
-        if (content.isBlank()) return
+        if (content.isBlank() && imageUris.isEmpty()) return
 
         viewModelScope.launch {
             val existing = currentEntry.value
             if (existing != null) {
-                journalEntryDao.update(existing.copy(content = content))
+                journalEntryDao.update(existing.copy(content = content, imageUris = imageUris))
             } else {
                 val newEntry = JournalEntry(
                     title = "",
                     content = content,
                     date = dateString,
-                    journalId = journalId
+                    journalId = journalId,
+                    imageUris = imageUris
                 )
                 journalEntryDao.insert(newEntry)
             }
