@@ -28,6 +28,18 @@ import io.github.realtryz.journal.ui.viewmodels.JournalViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * Overview screen for a journal.
+ *
+ * Displays all entries of a journal in a two-column grid. Entries are collected from the
+ * ViewModel as a Flow and the UI recomposes automatically when the data changes.
+ *
+ * @param modifier Optional Modifier for layout positioning.
+ * @param viewModel ViewModel that provides journal entries and handles selection actions.
+ * @param journalId ID of the journal whose entries will be displayed.
+ * @param onNavigateToDetail Callback invoked when an entry is selected (typically navigates to
+ *        the detail/edit screen). The callback receives the journal ID.
+ */
 @Composable
 fun JournalOverviewScreen(
     modifier: Modifier = Modifier,
@@ -57,6 +69,15 @@ fun JournalOverviewScreen(
     }
 }
 
+/**
+ * Single card representing a journal entry in the overview.
+ *
+ * This composable displays the entry content and date and handles click events.
+ *
+ * @param modifier Optional Modifier for card layout.
+ * @param entry The JournalEntry data object to display (content, date, etc.).
+ * @param onClick Called when the card is clicked.
+ */
 @Composable
 fun JournalOverviewItem(
     modifier: Modifier = Modifier,

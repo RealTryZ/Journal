@@ -3,7 +3,6 @@ package io.github.realtryz.journal.ui.screens
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -64,6 +63,17 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * Detail / edit view for a journal entry.
+ *
+ * Connects to ViewModel state (selected entry and date) and provides UI for entering text
+ * and images as well as navigation between days.
+ *
+ * @param modifier Optional Modifier for layout adjustments.
+ * @param viewModel ViewModel that provides and saves entries.
+ * @param journalId ID of the active journal.
+ * @param onSaved Callback invoked when the user saves (typically navigates back).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JournalEntryView(
@@ -197,6 +207,18 @@ fun JournalEntryView(
     }
 }
 
+/**
+ * TopBar for the journal detail view with date display, day navigation and actions.
+ *
+ * @param date Currently selected date (may be null).
+ * @param onDeleteClick Callback for deleting the current entry.
+ * @param onPreviousDayClick Navigate to previous day (should save current state).
+ * @param onNextDayClick Navigate to next day (should save current state).
+ * @param onDateClick Opens a date picker.
+ * @param onSaveClick Saves the current entry.
+ * @param onAddImageClick Opens the image picker.
+ * @param modifier Optional Modifier.
+ */
 @Composable
 fun JournalEntryTopBar(
     date: LocalDate?,
@@ -218,7 +240,7 @@ fun JournalEntryTopBar(
                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_entry))
             }
             IconButton(onClick = onAddImageClick) {
-                Icon(Icons.Default.Image, contentDescription = "Bild hinzufügen")
+                Icon(Icons.Default.Image, contentDescription = "Add image")
             }
         }
 
@@ -246,6 +268,13 @@ fun JournalEntryTopBar(
     }
 }
 
+/**
+ * Multiline text field for the journal content with ruled lines background.
+ *
+ * @param value Current text as TextFieldValue (including selection).
+ * @param onValueChange Callback invoked when text changes.
+ * @param modifier Optional Modifier.
+ */
 @Composable
 fun JournalEntryTextField(
     value: TextFieldValue,
@@ -291,6 +320,13 @@ fun JournalEntryTextField(
     )
 }
 
+/**
+ * Simple date picker dialog using the Material DatePicker.
+ *
+ * @param initialDate Pre-selected date (may be null).
+ * @param onDateSelected Callback with the selected LocalDate.
+ * @param onDismiss Called when the dialog is dismissed without selection.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JournalEntryDatePicker(

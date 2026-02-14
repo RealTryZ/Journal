@@ -8,6 +8,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 
+/**
+ * Simple confirmation dialog composable with configurable title, text and buttons.
+ *
+ * Reusable for delete/confirm flows across the UI.
+ *
+ * @param onDelete Optional callback executed when the confirm button is pressed.
+ * @param onDismiss Optional callback executed on dismiss/cancel.
+ * @param title Dialog title.
+ * @param text Dialog body text.
+ * @param confirmText Text for the confirm button.
+ * @param dismissText Text for the dismiss button.
+ */
 @Composable
 fun ConfirmationDialog(
     onDelete: (() -> Unit)? = null,

@@ -2,16 +2,10 @@ package io.github.realtryz.journal.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +25,16 @@ val journalColorResources = listOf(
 )
 
 /**
- * Shows the Journal Icon with Text.
+ * Displays a journal icon with the name below as a clickable card.
+ *
+ * Used in the `HomeScreen` overview to represent individual journals. Supports short tap
+ * and long press via `combinedClickable`.
+ *
+ * @param modifier Optional Modifier for layout adjustments.
+ * @param name Name of the journal to display.
+ * @param color Icon tint color (use `Color.Unspecified` for default behavior).
+ * @param onClick Callback for short click.
+ * @param onLongClick Callback for long press.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -67,8 +70,8 @@ fun JournalItem(
                         top = 30.dp, bottom = 90.dp,
                         start = 42.dp, end = 30.dp,
                     ),
-                contentAlignment = Alignment.Center,
-            ) {
+                    contentAlignment = Alignment.Center,
+                ) {
                 Text(
                     text = name,
                     textAlign = TextAlign.Center,
@@ -81,6 +84,14 @@ fun JournalItem(
     }
 }
 
+/**
+ * Large icon button used to create a new journal.
+ *
+ * Presented in the Home overview as a prominent call-to-action.
+ *
+ * @param modifier Optional Modifier to adjust size/position.
+ * @param onClick Callback executed when the button is tapped.
+ */
 @Composable
 fun AddJournalButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
     IconButton(

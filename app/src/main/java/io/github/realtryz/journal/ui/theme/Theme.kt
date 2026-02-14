@@ -32,6 +32,16 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+/**
+ * App-wide theme for the Journal app.
+ *
+ * Provides the color scheme and typography and wraps the given `content` composable.
+ * Supports dynamic colors (Android 12+) and system dark mode.
+ *
+ * @param darkTheme If true, the dark color scheme will be used (default: system setting).
+ * @param dynamicColor If true, dynamic colors will be used on supported devices.
+ * @param content The composable content to be wrapped by the theme.
+ */
 @Composable
 fun JournalTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

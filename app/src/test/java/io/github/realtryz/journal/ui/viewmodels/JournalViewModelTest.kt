@@ -146,7 +146,7 @@ class JournalViewModelTest {
             viewModel.selectJournal(journalId)
             advanceUntilIdle()
 
-            viewModel.nextDay("Today's Content")
+            viewModel.nextDay("Today's Content", emptyList())
             advanceUntilIdle()
 
             assertEquals(today.plusDays(1), viewModel.selectedDate.value)

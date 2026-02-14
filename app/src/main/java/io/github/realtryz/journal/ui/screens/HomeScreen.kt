@@ -51,6 +51,14 @@ import io.github.realtryz.journal.ui.components.JournalItem
 import io.github.realtryz.journal.ui.components.journalColorResources
 import io.github.realtryz.journal.ui.viewmodels.JournalViewModel
 
+/**
+ * Start / overview screen showing the list of journals and available actions (add, edit).
+ *
+ * @param modifier Optional Modifier.
+ * @param viewModel ViewModel that manages the journals.
+ * @param onNavigateToDetail Callback to open the detail/edit view.
+ * @param onNavigateToOverview Callback to open the grid overview for a journal.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
@@ -84,6 +92,7 @@ fun HomeScreen(
                     onLongClick = { journalToEdit = journal }
                 )
             }
+
             AddJournalButton(onClick = { showAddDialog = true })
         }
     }
@@ -121,8 +130,20 @@ fun HomeScreen(
     }
 }
 
-
-@OptIn(ExperimentalLayoutApi::class)
+/**
+ * Dialog to create or edit a journal.
+ *
+ * Shows a text field for the title, color selection and optional actions (delete / open overview).
+ *
+ * @param initialTitle Pre-filled title (for edit mode).
+ * @param initialColorArgb Pre-selected color as ARGB (optional).
+ * @param titleText Dialog title (e.g. "New Journal" / "Edit").
+ * @param confirmText Text for the confirm button.
+ * @param onDismiss Called when the dialog is dismissed.
+ * @param onConfirm Callback with (title, ARGB color) when confirmed.
+ * @param onDelete Optional delete callback.
+ * @param onOverview Optional callback to open the journal overview.
+ */
 @Composable
 fun JournalDialog(
     initialTitle: String = "",

@@ -1,20 +1,10 @@
 package io.github.realtryz.journal.ui.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -23,6 +13,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import io.github.realtryz.journal.R
 
+/**
+ * Screen displaying credits and links to third-party resources.
+ *
+ * @param onBackClicked Callback invoked when the back button is pressed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContributionsScreen(
@@ -33,40 +28,66 @@ fun ContributionsScreen(
     )
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.contributions_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClicked) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                }
-            )
-        }
+        topBar = { ContributionsTopAppBar(onBackClicked) }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.credits_title),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+        ContributionsContent(credits = credits, innerPadding = innerPadding)
+    }
+}
 
-            credits.forEach { (text, url) ->
-                CreditLink(text = text, url = url)
-                Spacer(modifier = Modifier.height(8.dp))
+/**
+ * Top app bar for the Contributions screen with a back navigation icon.
+ *
+ * @param onBackClicked Callback invoked when the navigation/back icon is pressed.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ContributionsTopAppBar(onBackClicked: () -> Unit) {
+    TopAppBar(
+        title = { Text(stringResource(R.string.contributions_title)) },
+        navigationIcon = {
+            IconButton(onClick = onBackClicked) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back)
+                )
             }
+        }
+    )
+}
+
+/**
+ * Content area for the Contributions screen that lists credit items as clickable links.
+ *
+ * @param credits List of pairs where the first element is the visible text and the second is the URL.
+ * @param innerPadding Padding values provided by the parent Scaffold.
+ */
+@Composable
+private fun ContributionsContent(credits: List<Pair<String, String>>, innerPadding: PaddingValues) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.credits_title),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        credits.forEach { (text, url) ->
+            CreditLink(text = text, url = url)
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
 
+/**
+ * Clickable link text that opens the given URL using the platform URI handler.
+ *
+ * @param text The visible link text.
+ * @param url The URL to open when clicked.
+ */
 @Composable
 fun CreditLink(text: String, url: String) {
     val uriHandler = LocalUriHandler.current

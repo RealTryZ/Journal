@@ -29,12 +29,21 @@ import io.github.realtryz.journal.ui.screens.SettingsScreen
 import io.github.realtryz.journal.ui.theme.BeigeYellow
 import io.github.realtryz.journal.ui.viewmodels.JournalViewModel
 
+/**
+ * Entry point for the Compose UI of the app. Initializes the back stack and starts
+ * the main scaffold.
+ */
 @Composable
 fun MainApp() {
     val backStack = remember { mutableStateListOf<Any>(Screens.Home) }
     MainScaffold(backStack)
 }
 
+/**
+ * Main scaffold containing bottom navigation and the NavDisplay host.
+ *
+ * @param backStack MutableList that holds the navigation back stack (top-level/detail/overview).
+ */
 @Composable
 fun MainScaffold(
     backStack: MutableList<Any>,

@@ -1,7 +1,6 @@
 package io.github.realtryz.journal.db
 
 import androidx.room.TypeConverter
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class Converters {
@@ -14,7 +13,7 @@ class Converters {
     fun toStringList(value: String): List<String> {
         return try {
             Json.decodeFromString(value)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }

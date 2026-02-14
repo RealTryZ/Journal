@@ -27,10 +27,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.os.LocaleListCompat
 import io.github.realtryz.journal.R
 import java.util.Locale
 
+/**
+ * Settings screen with language selection and other options.
+ *
+ * @param modifier Optional Modifier for layout adjustments.
+ * @param onContributorsClicked Callback that opens the contributions screen.
+ */
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
@@ -87,6 +92,12 @@ private fun isLanguageSelected(languageCode: String): Boolean {
             (locales.isEmpty && Locale.getDefault().language == languageCode)
 }
 
+/**
+ * Section header with content area for the settings screen.
+ *
+ * @param title Section title.
+ * @param content Composable content inside the section.
+ */
 @Composable
 fun SettingsSection(
     title: String,
@@ -102,6 +113,11 @@ fun SettingsSection(
     }
 }
 
+/**
+ * Bordered container grouping multiple settings items.
+ *
+ * @param content ColumnScope lambda containing the items.
+ */
 @Composable
 fun SettingsGroup(
     content: @Composable ColumnScope.() -> Unit
@@ -114,6 +130,14 @@ fun SettingsGroup(
     )
 }
 
+/**
+ * Clickable settings item with icon, title and description.
+ *
+ * @param title Item title.
+ * @param description Short description.
+ * @param icon ImageVector icon.
+ * @param onClick Action executed when tapped.
+ */
 @Composable
 fun SettingsClickableItem(
     title: String,
@@ -144,6 +168,13 @@ fun SettingsClickableItem(
     }
 }
 
+/**
+ * Selection row for language setting.
+ *
+ * @param languageName Visible name of the language.
+ * @param languageCode ISO language code (e.g. "en"/"de").
+ * @param isSelected Whether this language is currently selected.
+ */
 @Composable
 fun LanguageOption(
     languageName: String,
@@ -154,7 +185,7 @@ fun LanguageOption(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                val appLocale = LocaleListCompat.forLanguageTags(languageCode)
+                val appLocale = androidx.core.os.LocaleListCompat.forLanguageTags(languageCode)
                 AppCompatDelegate.setApplicationLocales(appLocale)
             }
             .padding(16.dp),
